@@ -1,1 +1,1 @@
-A sample command-line application providing basic argument parsing with an entrypoint in `bin/`.
+A simple command line application with basic functions for completing monohybrid and dihybrid crossing
