@@ -13,7 +13,7 @@ class Input {
     }
 
     if (crossingChoice == "M") {
-      stdout.writeln("Enter a letter to represent the trait (e.g., X,Z, or R):");
+      stdout.writeln("Enter any letter to represent the trait (e.g., X,Z, or R):");
       String? traitLetter = stdin.readLineSync()?.toUpperCase();
 
       if (traitLetter == null || traitLetter.length != 1) {
@@ -24,11 +24,16 @@ class Input {
       stdout.writeln("Enter parent 1 alleles (e.g., $traitLetter${traitLetter.toLowerCase()}):");
       String? parent1 = stdin.readLineSync();
 
+      if (!parent1!.toUpperCase().endsWith(traitLetter) || !parent1.toUpperCase().startsWith(traitLetter)) {
+        stdout.writeln("Error: parent does not contain chosen letter.");
+        return;
+      }
+
       stdout.writeln("Enter parent 2 alleles (e.g., $traitLetter${traitLetter.toLowerCase()}):");
       String? parent2 = stdin.readLineSync();
 
-      if (parent1 == null || parent2 == null) {
-        stdout.writeln("Error: Invalid input.");
+      if (!parent2!.toUpperCase().endsWith(traitLetter) || !parent2.toUpperCase().startsWith(traitLetter)) {
+        stdout.writeln("Error: parent does not contain chosen letter.");
         return;
       }
 
@@ -70,11 +75,16 @@ class Input {
       stdout.writeln("Enter parent 1 alleles (e.g., $trait1$trait1$trait2$trait2):");
       String? parent1 = stdin.readLineSync();
 
+      if (parent1 == null || !containsOnlyTraitLetters(parent1, traitLetters)) {
+        stdout.writeln("Error: parent does not contain both trait letters");
+        return;
+      }
+
       stdout.writeln("Enter parent 2 alleles (e.g., $trait1$trait1$trait2$trait2):");
       String? parent2 = stdin.readLineSync();
 
-      if (parent1 == null || parent2 == null) {
-        stdout.writeln("Error: Invalid input.");
+      if (parent2 == null || !containsOnlyTraitLetters(parent2, traitLetters)) {
+        stdout.writeln("Error: parent does not contain both trait letters");
         return;
       }
 
@@ -114,15 +124,26 @@ class Input {
     return phenotypeCounts;
   }
 
-
   static String getPhenotype(String genotype, String trait1, [String? trait2]) {
-    bool hasDominantTrait1 = genotype.contains(trait1);
-    String trait1Desc = hasDominantTrait1 ? "Dominant $trait1" : "Recessive ${trait1.toLowerCase()}";
+    String trait1Desc;
+
+    if (genotype.contains(trait1) && genotype.contains(trait1.toLowerCase())) {
+      trait1Desc = "Heterozygous Dominant $trait1";
+    } else if (genotype.contains(trait1) && genotype.contains(trait1)) {
+      trait1Desc = "Homozygous Dominant $trait1";
+    } else {
+      trait1Desc = "Homozygous Recessive ${trait1.toLowerCase()}";
+    }
 
     String trait2Desc = "";
     if (trait2 != null) {
-      bool hasDominantTrait2 = genotype.contains(trait2);
-      trait2Desc = hasDominantTrait2 ? "Dominant $trait2" : "Recessive ${trait2.toLowerCase()}";
+      if (genotype.contains(trait2) && genotype.contains(trait2.toLowerCase())) {
+        trait2Desc = "Heterozygous Dominant $trait2";
+      } else if (genotype.contains(trait1) && genotype.contains(trait1)) {
+        trait2Desc = "Homozygous Dominant $trait2";
+      } else {
+        trait2Desc = "Recessive ${trait2.toLowerCase()}";
+      }
     }
 
     if (trait2 != null) {
@@ -131,5 +152,14 @@ class Input {
 
     return trait1Desc;
   }
-
+  static bool containsOnlyTraitLetters(String parent, String traitLetters) {
+    String lowerParent = parent.toLowerCase();
+    String lowerTraitLetters = traitLetters.toLowerCase();
+    for (var letter in lowerParent.split('')) {
+      if (!lowerTraitLetters.contains(letter)) {
+        return false;
+      }
+    }
+    return true;
+  }
 }
